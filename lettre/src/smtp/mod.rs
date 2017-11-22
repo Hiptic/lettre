@@ -298,7 +298,7 @@ pub struct SmtpTransport {
     /// SmtpTransport variable states
     state: State,
     /// Information about the client
-    client_info: SmtpTransportBuilder,
+    pub client_info: SmtpTransportBuilder,
     /// Low level client
     client: Client,
 }
@@ -454,44 +454,45 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
                     self.get_ehlo()?;
                 }
             }
+        }
 
-            if self.client_info.credentials.is_some() {
-                let mut found = false;
+        if self.client_info.credentials.is_some() {
+            let mut found = false;
 
-                // Compute accepted mechanism
-                let accepted_mechanisms = match self.client_info.authentication_mechanism {
-                    Some(mechanism) => vec![mechanism],
-                    None => {
-                        if self.client.is_encrypted() {
-                            DEFAULT_ENCRYPTED_MECHANISMS.to_vec()
-                        } else {
-                            DEFAULT_UNENCRYPTED_MECHANISMS.to_vec()
-                        }
-                    }
-                };
-
-                for mechanism in accepted_mechanisms {
-                    if self.server_info.as_ref().unwrap().supports_auth_mechanism(
-                        mechanism,
-                    )
-                    {
-                        found = true;
-                        try_smtp!(
-                            self.client.auth(
-                                mechanism,
-                                self.client_info.credentials.as_ref().unwrap(),
-                            ),
-                            self
-                        );
-                        break;
+            // Compute accepted mechanism
+            let accepted_mechanisms = match self.client_info.authentication_mechanism {
+                Some(mechanism) => vec![mechanism],
+                None => {
+                    if self.client.is_encrypted() {
+                        DEFAULT_ENCRYPTED_MECHANISMS.to_vec()
+                    } else {
+                        DEFAULT_UNENCRYPTED_MECHANISMS.to_vec()
                     }
                 }
+            };
 
-                if !found {
-                    info!("No supported authentication mechanisms available");
+            for mechanism in accepted_mechanisms {
+                if self.server_info.as_ref().unwrap().supports_auth_mechanism(
+                    mechanism,
+                )
+                {
+                    found = true;
+                    try_smtp!(
+                        self.client.auth(
+                            mechanism,
+                            self.client_info.credentials.as_ref().unwrap(),
+                        ),
+                        self
+                    );
+                    break;
                 }
             }
+
+            if !found {
+                info!("No supported authentication mechanisms available");
+            }
         }
+
 
         // Mail
         let mut mail_options = vec![];
