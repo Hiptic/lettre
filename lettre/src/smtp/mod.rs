@@ -300,7 +300,7 @@ pub struct SmtpTransport {
     /// Information about the client
     pub client_info: SmtpTransportBuilder,
     /// Low level client
-    client: Client,
+    pub client: Client,
 }
 
 macro_rules! try_smtp (
@@ -405,7 +405,7 @@ impl<'a> SmtpTransport {
 impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
     /// Sends an email
     #[cfg_attr(feature = "cargo-clippy", allow(match_same_arms, cyclomatic_complexity))]
-    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U) -> SmtpResult {
+    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U, credentials: Option<Credentials>) -> SmtpResult {
 
         // Extract email information
         let message_id = email.message_id();
@@ -456,7 +456,7 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
             }
         }
 
-        if self.client_info.credentials.is_some() {
+        if self.client_info.credentials.is_some() || credentials.is_some() {
             let mut found = false;
 
             // Compute accepted mechanism
@@ -471,19 +471,30 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
                 }
             };
 
+
             for mechanism in accepted_mechanisms {
                 if self.server_info.as_ref().unwrap().supports_auth_mechanism(
                     mechanism,
                 )
                 {
                     found = true;
-                    try_smtp!(
-                        self.client.auth(
-                            mechanism,
-                            self.client_info.credentials.as_ref().unwrap(),
-                        ),
-                        self
-                    );
+                    if credentials.is_some() {
+                        try_smtp!(
+                            self.client.auth(
+                                mechanism,
+                                credentials.as_ref().unwrap(),
+                            ),
+                            self
+                        );
+                    } else {
+                        try_smtp!(
+                            self.client.auth(
+                                mechanism,
+                                self.client_info.credentials.as_ref().unwrap(),
+                            ),
+                            self
+                        );
+                    }
                     break;
                 }
             }

@@ -5,7 +5,7 @@
 //!
 
 #![doc(html_root_url = "https://docs.rs/lettre/0.7.0")]
-#![deny(missing_docs, unsafe_code, unstable_features, warnings)]
+#![deny(unsafe_code, unstable_features)]
 
 #[macro_use]
 extern crate log;
@@ -46,6 +46,7 @@ pub use sendmail::SendmailTransport;
 pub use smtp::{ClientSecurity, SmtpTransport};
 #[cfg(feature = "smtp-transport")]
 pub use smtp::client::net::ClientTlsParameters;
+use smtp::authentication::{Credentials, Mechanism};
 use std::fmt::{self, Display, Formatter};
 use std::io::Read;
 
@@ -82,7 +83,7 @@ pub trait SendableEmail<'a, T: Read + 'a> {
 /// Transport method for emails
 pub trait EmailTransport<'a, U: Read + 'a, V> {
     /// Sends the email
-    fn send<T: SendableEmail<'a, U> + 'a>(&mut self, email: &'a T) -> V;
+    fn send<T: SendableEmail<'a, U> + 'a>(&mut self, email: &'a T, credentials: Option<Credentials>) -> V;
 }
 
 /// Minimal email structure

@@ -26,6 +26,7 @@
 use EmailTransport;
 use SendableEmail;
 use std::io::Read;
+use smtp::authentication::{Credentials};
 
 /// This transport logs the message envelope and returns the given response
 #[derive(Debug)]
@@ -49,7 +50,7 @@ impl StubEmailTransport {
 pub type StubResult = Result<(), ()>;
 
 impl<'a, T: Read + 'a> EmailTransport<'a, T, StubResult> for StubEmailTransport {
-    fn send<U: SendableEmail<'a, T>>(&mut self, email: &'a U) -> StubResult {
+    fn send<U: SendableEmail<'a, T>>(&mut self, email: &'a U, credentials: Option<Credentials>) -> StubResult {
 
         info!(
             "{}: from=<{}> to=<{:?}>",

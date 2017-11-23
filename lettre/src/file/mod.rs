@@ -42,6 +42,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
+use smtp::authentication::{Credentials};
 
 pub mod error;
 
@@ -61,7 +62,7 @@ impl FileEmailTransport {
 }
 
 impl<'a, T: Read + 'a> EmailTransport<'a, T, FileResult> for FileEmailTransport {
-    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U) -> FileResult {
+    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U, credentials: Option<Credentials>) -> FileResult {
         let mut file = self.path.clone();
         file.push(format!("{}.txt", email.message_id()));
 
