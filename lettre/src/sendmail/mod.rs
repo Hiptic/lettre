@@ -21,7 +21,6 @@ use sendmail::error::SendmailResult;
 use std::io::Read;
 use std::io::prelude::*;
 use std::process::{Command, Stdio};
-use smtp::authentication::{Credentials};
 
 pub mod error;
 
@@ -44,7 +43,7 @@ impl SendmailTransport {
 }
 
 impl<'a, T: Read + 'a> EmailTransport<'a, T, SendmailResult> for SendmailTransport {
-    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U, credentials: Option<Credentials>) -> SendmailResult {
+    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U) -> SendmailResult {
         // Spawn the sendmail command
         let to_addresses: Vec<String> = email.to().iter().map(|x| x.to_string()).collect();
         let mut process = Command::new(&self.command)

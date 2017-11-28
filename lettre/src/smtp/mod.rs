@@ -400,12 +400,16 @@ impl<'a> SmtpTransport {
         self.state.panic = false;
         self.state.connection_reuse_count = 0;
     }
+
+    pub fn update_credentials<S: Into<Credentials>>(&mut self, credentials: S) {
+        self.client_info.credentials = Some(credentials.into());
+    }
 }
 
 impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
     /// Sends an email
     #[cfg_attr(feature = "cargo-clippy", allow(match_same_arms, cyclomatic_complexity))]
-    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U, credentials: Option<Credentials>) -> SmtpResult {
+    fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U) -> SmtpResult {
 
         // Extract email information
         let message_id = email.message_id();
@@ -456,7 +460,7 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
             }
         }
 
-        if self.client_info.credentials.is_some() || credentials.is_some() {
+        if self.client_info.credentials.is_some() {
             let mut found = false;
 
             // Compute accepted mechanism
@@ -478,24 +482,13 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
                 )
                 {
                     found = true;
-                    if credentials.is_some() {
-                        try_smtp!(
-                            self.client.auth(
-                                mechanism,
-                                credentials.as_ref().unwrap(),
-                            ),
-                            self
-                        );
-                    } else {
-                        try_smtp!(
-                            self.client.auth(
-                                mechanism,
-                                self.client_info.credentials.as_ref().unwrap(),
-                            ),
-                            self
-                        );
-                    }
-                    break;
+                    try_smtp!(
+                        self.client.auth(
+                            mechanism,
+                            self.client_info.credentials.as_ref().unwrap(),
+                        ),
+                        self
+                    );
                 }
             }
 
