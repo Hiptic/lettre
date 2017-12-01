@@ -104,6 +104,11 @@ impl<S: Write + Read> Client<S> {
 }
 
 impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
+    /// Is there an existing stream
+    pub fn has_stream(&mut self) -> bool {
+        self.stream.is_some()
+    }
+
     /// Closes the SMTP transaction if possible
     pub fn close(&mut self) {
         let _ = self.smtp_command(QuitCommand);
