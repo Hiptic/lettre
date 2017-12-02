@@ -403,6 +403,47 @@ impl<'a> SmtpTransport {
         self.state.connection_reuse_count = 0;
     }
 
+    /// Authorize for client credentials
+    pub fn send_auth(&mut self, credentials: Credentials) -> Result<(), Error> {
+        self.client_info.credentials = Some(credentials);
+        let mut found = false;
+
+        // Compute accepted mechanism
+        let accepted_mechanisms = match self.client_info.authentication_mechanism {
+            Some(mechanism) => vec![mechanism],
+            None => {
+                if self.client.is_encrypted() {
+                    DEFAULT_ENCRYPTED_MECHANISMS.to_vec()
+                } else {
+                    DEFAULT_UNENCRYPTED_MECHANISMS.to_vec()
+                }
+            }
+        };
+
+        for mechanism in accepted_mechanisms {
+            if self.server_info.as_ref().unwrap().supports_auth_mechanism(
+                mechanism,
+            )
+            {
+                found = true;
+                try_smtp!(
+                    self.client.auth(
+                        mechanism,
+                        self.client_info.credentials.as_ref().unwrap(),
+                    ),
+                    self
+                );
+                break;
+            }
+        }
+
+        if !found {
+            info!("No supported authentication mechanisms available");
+        }
+        Ok(())
+    }
+
+
     /// Can the connection be reused
     pub fn can_reuse(&mut self) -> bool {
         (self.state.connection_reuse_count > 0)
@@ -459,40 +500,8 @@ impl<'a> SmtpTransport {
         }
 
         if self.client_info.credentials.is_some() {
-            let mut found = false;
-
-            // Compute accepted mechanism
-            let accepted_mechanisms = match self.client_info.authentication_mechanism {
-                Some(mechanism) => vec![mechanism],
-                None => {
-                    if self.client.is_encrypted() {
-                        DEFAULT_ENCRYPTED_MECHANISMS.to_vec()
-                    } else {
-                        DEFAULT_UNENCRYPTED_MECHANISMS.to_vec()
-                    }
-                }
-            };
-
-            for mechanism in accepted_mechanisms {
-                if self.server_info.as_ref().unwrap().supports_auth_mechanism(
-                    mechanism,
-                )
-                {
-                    found = true;
-                    try_smtp!(
-                        self.client.auth(
-                            mechanism,
-                            self.client_info.credentials.as_ref().unwrap(),
-                        ),
-                        self
-                    );
-                    break;
-                }
-            }
-
-            if !found {
-                info!("No supported authentication mechanisms available");
-            }
+            let credentials = self.client_info.credentials.as_ref().unwrap().clone();
+            self.send_auth(credentials)?;
         }
         Ok(())
     }
