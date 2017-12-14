@@ -1,5 +1,0 @@
-[workspace]
-members = [
-    "lettre",
-    "lettre_email",
-]
