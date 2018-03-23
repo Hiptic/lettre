@@ -17,13 +17,15 @@ travis-ci = { repository = "lettre/lettre" }
 [dependencies]
 log = "^0.3"
 bufstream = { version = "^0.1", optional = true }
-native-tls = { version = "^0.1", optional = true }
 base64 = { version = "^0.7", optional = true }
 hex = { version = "^0.2", optional = true }
 rust-crypto = { version = "^0.2", optional = true }
 serde = { version = "^1.0", optional = true }
 serde_json = { version = "^1.0", optional = true }
 serde_derive = { version = "^1.0", optional = true }
+
+# this fork is to update openssl in native-tls to 0.10
+native-tls = { git = 'https://github.com/DarrenTsung/rust-native-tls', optional = true }
 
 [dev-dependencies]
 env_logger = "^0.4"
