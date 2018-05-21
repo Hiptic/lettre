@@ -1,6 +1,6 @@
 //! The sendmail transport sends the email using the local sendmail command.
 //!
-//! ```rust
+//! ```rust, ignore
 //! use lettre::sendmail::SendmailTransport;
 //! use lettre::{SimpleSendableEmail, EmailTransport, EmailAddress};
 //!
@@ -18,8 +18,8 @@
 
 use {EmailTransport, SendableEmail};
 use sendmail::error::SendmailResult;
-use std::io::Read;
 use std::io::prelude::*;
+use std::io::Read;
 use std::process::{Command, Stdio};
 
 pub mod error;
