@@ -4,7 +4,9 @@ extern crate lettre;
 #[cfg(feature = "smtp-transport")]
 mod test {
 
-    use lettre::{ClientSecurity, EmailAddress, EmailTransport, SimpleSendableEmail, SmtpTransport};
+    use lettre::{
+        ClientSecurity, EmailAddress, EmailTransport, SimpleSendableEmail, SmtpTransport,
+    };
 
     // TODO (darren): these don't work in the Docker environment, look into removing the
     // lettre submodule..

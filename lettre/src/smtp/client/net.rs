@@ -1,6 +1,6 @@
 //! A trait to represent a stream
 
-use native_tls::{TlsConnector, TlsStream, Protocol};
+use native_tls::{Protocol, TlsConnector, TlsStream};
 use smtp::client::mock::MockStream;
 use std::io::{self, ErrorKind, Read, Write};
 use std::net::{Ipv4Addr, Shutdown, SocketAddr, SocketAddrV4, TcpStream};
@@ -18,16 +18,13 @@ pub struct ClientTlsParameters {
 impl ClientTlsParameters {
     /// Creates a `ClientTlsParameters`
     pub fn new(domain: String, connector: TlsConnector) -> ClientTlsParameters {
-        ClientTlsParameters {
-            connector: connector,
-            domain: domain,
-        }
+        ClientTlsParameters { connector, domain }
     }
 }
 
 /// Accepted protocols by default.
 /// This removes TLS 1.0 compared to tls-native defaults.
-pub const DEFAULT_TLS_PROTOCOLS : &'static [Protocol] = &[Protocol::Tlsv11, Protocol::Tlsv12];
+pub const DEFAULT_TLS_PROTOCOLS: &'static [Protocol] = &[Protocol::Tlsv11, Protocol::Tlsv12];
 
 #[derive(Debug)]
 /// Represents the different types of underlying network streams
@@ -46,11 +43,10 @@ impl NetworkStream {
         match *self {
             NetworkStream::Tcp(ref s) => s.peer_addr(),
             NetworkStream::Tls(ref s) => s.get_ref().peer_addr(),
-            NetworkStream::Mock(_) => {
-                Ok(SocketAddr::V4(
-                    SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 80),
-                ))
-            }
+            NetworkStream::Mock(_) => Ok(SocketAddr::V4(SocketAddrV4::new(
+                Ipv4Addr::new(127, 0, 0, 1),
+                80,
+            ))),
         }
     }
 
@@ -111,13 +107,11 @@ impl Connector for NetworkStream {
         let tcp_stream = TcpStream::connect(addr)?;
 
         match tls_parameters {
-            Some(context) => {
-                context
-                    .connector
-                    .connect(context.domain.as_ref(), tcp_stream)
-                    .map(NetworkStream::Tls)
-                    .map_err(|e| io::Error::new(ErrorKind::Other, e))
-            }
+            Some(context) => context
+                .connector
+                .connect(context.domain.as_ref(), tcp_stream)
+                .map(NetworkStream::Tls)
+                .map_err(|e| io::Error::new(ErrorKind::Other, e)),
             None => Ok(NetworkStream::Tcp(tcp_stream)),
         }
     }
@@ -125,15 +119,13 @@ impl Connector for NetworkStream {
     #[cfg_attr(feature = "cargo-clippy", allow(match_same_arms))]
     fn upgrade_tls(&mut self, tls_parameters: &ClientTlsParameters) -> io::Result<()> {
         *self = match *self {
-            NetworkStream::Tcp(ref mut stream) => {
-                match tls_parameters.connector.connect(
-                    tls_parameters.domain.as_ref(),
-                    stream.try_clone().unwrap(),
-                ) {
-                    Ok(tls_stream) => NetworkStream::Tls(tls_stream),
-                    Err(err) => return Err(io::Error::new(ErrorKind::Other, err)),
-                }
-            }
+            NetworkStream::Tcp(ref mut stream) => match tls_parameters
+                .connector
+                .connect(tls_parameters.domain.as_ref(), stream.try_clone().unwrap())
+            {
+                Ok(tls_stream) => NetworkStream::Tls(tls_stream),
+                Err(err) => return Err(io::Error::new(ErrorKind::Other, err)),
+            },
             NetworkStream::Tls(_) => return Ok(()),
             NetworkStream::Mock(_) => return Ok(()),
         };

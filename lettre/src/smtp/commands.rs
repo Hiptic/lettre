@@ -1,14 +1,14 @@
 //! SMTP commands
 
-use EmailAddress;
 use base64;
-use smtp::CRLF;
 use smtp::authentication::{Credentials, Mechanism};
 use smtp::error::Error;
-use smtp::extension::{MailParameter, RcptParameter};
 use smtp::extension::ClientId;
+use smtp::extension::{MailParameter, RcptParameter};
 use smtp::response::Response;
+use smtp::CRLF;
 use std::fmt::{self, Display, Formatter};
+use EmailAddress;
 
 /// EHLO command
 #[derive(PartialEq, Clone, Debug)]
@@ -26,7 +26,7 @@ impl Display for EhloCommand {
 impl EhloCommand {
     /// Creates a EHLO command
     pub fn new(client_id: ClientId) -> EhloCommand {
-        EhloCommand { client_id: client_id }
+        EhloCommand { client_id }
     }
 }
 
@@ -68,10 +68,7 @@ impl Display for MailCommand {
 impl MailCommand {
     /// Creates a MAIL command
     pub fn new(sender: Option<EmailAddress>, parameters: Vec<MailParameter>) -> MailCommand {
-        MailCommand {
-            sender: sender,
-            parameters: parameters,
-        }
+        MailCommand { sender, parameters }
     }
 }
 
@@ -96,8 +93,8 @@ impl RcptCommand {
     /// Creates an RCPT command
     pub fn new(recipient: EmailAddress, parameters: Vec<RcptParameter>) -> RcptCommand {
         RcptCommand {
-            recipient: recipient,
-            parameters: parameters,
+            recipient,
+            parameters,
         }
     }
 }
@@ -154,7 +151,7 @@ impl Display for HelpCommand {
 impl HelpCommand {
     /// Creates an HELP command
     pub fn new(argument: Option<String>) -> HelpCommand {
-        HelpCommand { argument: argument }
+        HelpCommand { argument }
     }
 }
 
@@ -174,7 +171,7 @@ impl Display for VrfyCommand {
 impl VrfyCommand {
     /// Creates a VRFY command
     pub fn new(argument: String) -> VrfyCommand {
-        VrfyCommand { argument: argument }
+        VrfyCommand { argument }
     }
 }
 
@@ -194,7 +191,7 @@ impl Display for ExpnCommand {
 impl ExpnCommand {
     /// Creates an EXPN command
     pub fn new(argument: String) -> ExpnCommand {
-        ExpnCommand { argument: argument }
+        ExpnCommand { argument }
     }
 }
 
@@ -249,18 +246,15 @@ impl AuthCommand {
         challenge: Option<String>,
     ) -> Result<AuthCommand, Error> {
         let response = if mechanism.supports_initial_response() || challenge.is_some() {
-            Some(mechanism.response(
-                &credentials,
-                challenge.as_ref().map(String::as_str),
-            )?)
+            Some(mechanism.response(&credentials, challenge.as_ref().map(String::as_str))?)
         } else {
             None
         };
         Ok(AuthCommand {
-            mechanism: mechanism,
-            credentials: credentials,
-            challenge: challenge,
-            response: response,
+            mechanism,
+            credentials,
+            challenge,
+            response,
         })
     }
 
@@ -283,27 +277,22 @@ impl AuthCommand {
         debug!("auth encoded challenge: {}", encoded_challenge);
 
         let decoded_challenge = match base64::decode(&encoded_challenge) {
-            Ok(challenge) => {
-                match String::from_utf8(challenge) {
-                    Ok(value) => value,
-                    Err(error) => return Err(Error::Utf8Parsing(error)),
-                }
-            }
+            Ok(challenge) => match String::from_utf8(challenge) {
+                Ok(value) => value,
+                Err(error) => return Err(Error::Utf8Parsing(error)),
+            },
             Err(error) => return Err(Error::ChallengeParsing(error)),
         };
 
         debug!("auth decoded challenge: {}", decoded_challenge);
 
-        let response = Some(mechanism.response(
-            &credentials,
-            Some(decoded_challenge.as_ref()),
-        )?);
+        let response = Some(mechanism.response(&credentials, Some(decoded_challenge.as_ref()))?);
 
         Ok(AuthCommand {
-            mechanism: mechanism,
-            credentials: credentials,
+            mechanism,
+            credentials,
             challenge: Some(decoded_challenge),
-            response: response,
+            response,
         })
     }
 }

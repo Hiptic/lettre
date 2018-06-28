@@ -1,20 +1,20 @@
 //! SMTP client
 
 use bufstream::BufStream;
-use smtp::{CRLF, MESSAGE_ENDING};
 use smtp::authentication::{Credentials, Mechanism};
 use smtp::client::net::{ClientTlsParameters, Connector, NetworkStream, Timeout};
 use smtp::commands::*;
 use smtp::error::{Error, SmtpResult};
 use smtp::response::ResponseParser;
+use smtp::{CRLF, MESSAGE_ENDING};
 use std::fmt::{Debug, Display};
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::ToSocketAddrs;
 use std::string::String;
 use std::time::Duration;
 
-pub mod net;
 pub mod mock;
+pub mod net;
 
 /// The codec used for transparency
 #[derive(Default, Debug)]
@@ -43,7 +43,7 @@ impl ClientCodec {
                 }
                 self.escape_count = 0;
                 Ok(())
-            }
+            },
             _ => {
                 let mut start = 0;
                 for (idx, byte) in frame.iter().enumerate() {
@@ -61,8 +61,7 @@ impl ClientCodec {
                     }
                 }
                 Ok(buf.write_all(&frame[start..])?)
-            }
-
+            },
         }
     }
 }
@@ -143,7 +142,7 @@ impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
                 stream.get_mut().set_read_timeout(duration)?;
                 stream.get_mut().set_read_timeout(duration)?;
                 Ok(())
-            }
+            },
             None => Ok(()),
         }
     }
@@ -184,9 +183,8 @@ impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
     pub fn auth(&mut self, mechanism: Mechanism, credentials: &Credentials) -> SmtpResult {
         // TODO
         let mut challenges = 10;
-        let mut response = self.smtp_command(
-            AuthCommand::new(mechanism, credentials.clone(), None)?,
-        )?;
+        let mut response =
+            self.smtp_command(AuthCommand::new(mechanism, credentials.clone(), None)?)?;
 
         while challenges > 0 && response.has_code(334) {
             challenges -= 1;
@@ -214,8 +212,11 @@ impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
             out_buf.clear();
 
             let consumed = match message_reader.fill_buf() {
-                Ok(bytes) => { codec.encode(bytes, &mut out_buf)?; bytes.len() },
-                Err(ref err) => panic!("Failed with: {}", err)
+                Ok(bytes) => {
+                    codec.encode(bytes, &mut out_buf)?;
+                    bytes.len()
+                },
+                Err(ref err) => panic!("Failed with: {}", err),
             };
             message_reader.consume(consumed);
 
@@ -254,7 +255,6 @@ impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
 
     /// Gets the SMTP response
     fn get_reply(&mut self) -> SmtpResult {
-
         let mut parser = ResponseParser::default();
 
         let mut line = String::new();
@@ -279,7 +279,7 @@ impl<S: Connector + Write + Read + Timeout + Debug> Client<S> {
 
 #[cfg(test)]
 mod test {
-    use super::{ClientCodec, escape_crlf, remove_crlf};
+    use super::{escape_crlf, remove_crlf, ClientCodec};
 
     #[test]
     fn test_codec() {

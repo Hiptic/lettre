@@ -152,13 +152,11 @@ impl FromStr for Code {
                 s[1..2].parse::<Category>(),
                 s[2..3].parse::<Detail>(),
             ) {
-                (Ok(severity), Ok(category), Ok(detail)) => {
-                    Ok(Code {
-                        severity: severity,
-                        category: category,
-                        detail: detail,
-                    })
-                }
+                (Ok(severity), Ok(category), Ok(detail)) => Ok(Code {
+                    severity,
+                    category,
+                    detail,
+                }),
                 _ => Err(Error::ResponseParsing("Could not parse response code")),
             }
         } else {
@@ -177,9 +175,9 @@ impl Code {
         }
 
         Code {
-            severity: severity,
-            category: category,
-            detail: detail,
+            severity,
+            category,
+            detail,
         }
     }
 }
@@ -197,7 +195,6 @@ pub struct ResponseParser {
 impl ResponseParser {
     /// Parses a line and return a `bool` indicating if there are more lines to come
     pub fn read_line(&mut self, line: &str) -> result::Result<bool, Error> {
-
         if line.len() < 3 {
             return Err(Error::ResponseParsing(
                 "Incorrect response code (should be 3 digits)",
@@ -212,7 +209,7 @@ impl ResponseParser {
                          reponse",
                     ));
                 }
-            }
+            },
             None => self.code = Some(line[0..3].parse::<Code>()?),
         }
 
@@ -228,12 +225,10 @@ impl ResponseParser {
     pub fn response(self) -> SmtpResult {
         match self.code {
             Some(code) => Ok(Response::new(code, self.message)),
-            None => {
-                Err(Error::ResponseParsing(
-                    "Incomplete response, could not read response \
-                     code",
-                ))
-            }
+            None => Err(Error::ResponseParsing(
+                "Incomplete response, could not read response \
+                 code",
+            )),
         }
     }
 }
@@ -253,10 +248,7 @@ pub struct Response {
 impl Response {
     /// Creates a new `Response`
     pub fn new(code: Code, message: Vec<String>) -> Response {
-        Response {
-            code: code,
-            message: message,
-        }
+        Response { code, message }
     }
 
     /// Tells if the response is positive
@@ -274,9 +266,9 @@ impl Response {
 
     /// Returns only the first word of the message if possible
     pub fn first_word(&self) -> Option<&str> {
-        self.message.get(0).and_then(
-            |line| line.split_whitespace().next(),
-        )
+        self.message
+            .get(0)
+            .and_then(|line| line.split_whitespace().next())
     }
 
     /// Returns only the line of the message if possible
@@ -468,18 +460,20 @@ mod test {
                 ],
             ).is_positive()
         );
-        assert!(!Response::new(
-            Code {
-                severity: "5".parse::<Severity>().unwrap(),
-                category: "3".parse::<Category>().unwrap(),
-                detail: "1".parse::<Detail>().unwrap(),
-            },
-            vec![
-                "me".to_string(),
-                "8BITMIME".to_string(),
-                "SIZE 42".to_string(),
-            ],
-        ).is_positive());
+        assert!(
+            !Response::new(
+                Code {
+                    severity: "5".parse::<Severity>().unwrap(),
+                    category: "3".parse::<Category>().unwrap(),
+                    detail: "1".parse::<Detail>().unwrap(),
+                },
+                vec![
+                    "me".to_string(),
+                    "8BITMIME".to_string(),
+                    "SIZE 42".to_string(),
+                ],
+            ).is_positive()
+        );
     }
 
     #[test]
@@ -498,18 +492,20 @@ mod test {
                 ],
             ).has_code(241)
         );
-        assert!(!Response::new(
-            Code {
-                severity: "2".parse::<Severity>().unwrap(),
-                category: "5".parse::<Category>().unwrap(),
-                detail: "1".parse::<Detail>().unwrap(),
-            },
-            vec![
-                "me".to_string(),
-                "8BITMIME".to_string(),
-                "SIZE 42".to_string(),
-            ],
-        ).has_code(241));
+        assert!(
+            !Response::new(
+                Code {
+                    severity: "2".parse::<Severity>().unwrap(),
+                    category: "5".parse::<Category>().unwrap(),
+                    detail: "1".parse::<Detail>().unwrap(),
+                },
+                vec![
+                    "me".to_string(),
+                    "8BITMIME".to_string(),
+                    "SIZE 42".to_string(),
+                ],
+            ).has_code(241)
+        );
     }
 
     #[test]

@@ -4,11 +4,11 @@ extern crate lettre;
 #[cfg(feature = "file-transport")]
 mod test {
 
-    use lettre::{EmailAddress, EmailTransport, SendableEmail, SimpleSendableEmail};
     use lettre::file::FileEmailTransport;
+    use lettre::{EmailAddress, EmailTransport, SendableEmail, SimpleSendableEmail};
     use std::env::temp_dir;
-    use std::fs::File;
     use std::fs::remove_file;
+    use std::fs::File;
     use std::io::Read;
 
     #[test]
@@ -32,7 +32,7 @@ mod test {
         assert_eq!(
             buffer,
             "{\"to\":[\"root@localhost\"],\"from\":\"user@localhost\",\"message_id\":\
-            \"file_id\",\"message\":[72,101,108,108,111,32,102,105,108,101]}"
+             \"file_id\",\"message\":[72,101,108,108,111,32,102,105,108,101]}"
         );
 
         remove_file(file).unwrap();

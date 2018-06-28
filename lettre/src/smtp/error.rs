@@ -2,13 +2,13 @@
 
 use self::Error::*;
 use base64::DecodeError;
+use native_tls;
 use smtp::response::{Response, Severity};
 use std::error::Error as StdError;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::io;
 use std::string::FromUtf8Error;
-use native_tls;
 
 /// An enum of all error kinds.
 #[derive(Debug)]
@@ -49,18 +49,14 @@ impl StdError for Error {
         match *self {
             // Try to display the first line of the server's response that usually
             // contains a short humanly readable error message
-            Transient(ref err) => {
-                match err.first_line() {
-                    Some(line) => line,
-                    None => "undetailed transient error during SMTP transaction",
-                }
-            }
-            Permanent(ref err) => {
-                match err.first_line() {
-                    Some(line) => line,
-                    None => "undetailed permanent error during SMTP transaction",
-                }
-            }
+            Transient(ref err) => match err.first_line() {
+                Some(line) => line,
+                None => "undetailed transient error during SMTP transaction",
+            },
+            Permanent(ref err) => match err.first_line() {
+                Some(line) => line,
+                None => "undetailed permanent error during SMTP transaction",
+            },
             ResponseParsing(err) => err,
             ChallengeParsing(ref err) => err.description(),
             Utf8Parsing(ref err) => err.description(),

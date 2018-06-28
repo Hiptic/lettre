@@ -1,5 +1,5 @@
-extern crate lettre;
 extern crate env_logger;
+extern crate lettre;
 
 use lettre::{EmailAddress, EmailTransport, SimpleSendableEmail, SmtpTransport};
 

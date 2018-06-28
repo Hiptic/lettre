@@ -33,15 +33,15 @@
 //! Hello World!
 //! ```
 
-use EmailTransport;
-use SendableEmail;
-use SimpleSendableEmail;
 use file::error::FileResult;
 use serde_json;
 use std::fs::File;
-use std::io::Read;
 use std::io::prelude::*;
+use std::io::Read;
 use std::path::{Path, PathBuf};
+use EmailTransport;
+use SendableEmail;
+use SimpleSendableEmail;
 
 pub mod error;
 
@@ -77,9 +77,7 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, FileResult> for FileEmailTransport 
             message_content,
         );
 
-        f.write_all(
-            serde_json::to_string(&simple_email)?.as_bytes(),
-        )?;
+        f.write_all(serde_json::to_string(&simple_email)?.as_bytes())?;
 
         Ok(())
     }

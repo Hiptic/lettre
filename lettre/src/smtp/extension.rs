@@ -110,37 +110,37 @@ impl ServerInfo {
             match splitted[0] {
                 "8BITMIME" => {
                     features.insert(Extension::EightBitMime);
-                }
+                },
                 "SMTPUTF8" => {
                     features.insert(Extension::SmtpUtfEight);
-                }
+                },
                 "STARTTLS" => {
                     features.insert(Extension::StartTls);
-                }
+                },
                 "AUTH" => {
                     for &mechanism in &splitted[1..] {
                         match mechanism {
                             "PLAIN" => {
                                 features.insert(Extension::Authentication(Mechanism::Plain));
-                            }
+                            },
                             "LOGIN" => {
                                 features.insert(Extension::Authentication(Mechanism::Login));
-                            }
+                            },
                             #[cfg(feature = "crammd5-auth")]
                             "CRAM-MD5" => {
                                 features.insert(Extension::Authentication(Mechanism::CramMd5));
-                            }
+                            },
                             _ => (),
                         }
                     }
-                }
+                },
                 _ => (),
             };
         }
 
         Ok(ServerInfo {
             name: name.to_string(),
-            features: features,
+            features,
         })
     }
 
@@ -151,9 +151,8 @@ impl ServerInfo {
 
     /// Checks if the server supports an ESMTP feature
     pub fn supports_auth_mechanism(&self, mechanism: Mechanism) -> bool {
-        self.features.contains(
-            &Extension::Authentication(mechanism),
-        )
+        self.features
+            .contains(&Extension::Authentication(mechanism))
     }
 }
 
@@ -322,7 +321,7 @@ mod test {
 
         let server_info = ServerInfo {
             name: "me".to_string(),
-            features: features,
+            features,
         };
 
         assert_eq!(ServerInfo::from_response(&response).unwrap(), server_info);
@@ -348,13 +347,9 @@ mod test {
 
         let mut features2 = HashSet::new();
         assert!(features2.insert(Extension::EightBitMime));
-        assert!(features2.insert(
-            Extension::Authentication(Mechanism::Plain),
-        ));
+        assert!(features2.insert(Extension::Authentication(Mechanism::Plain),));
         #[cfg(feature = "crammd5-auth")]
-        assert!(features2.insert(
-            Extension::Authentication(Mechanism::CramMd5),
-        ));
+        assert!(features2.insert(Extension::Authentication(Mechanism::CramMd5),));
 
         let server_info2 = ServerInfo {
             name: "me".to_string(),

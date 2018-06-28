@@ -8,8 +8,8 @@ use crypto::mac::Mac;
 use crypto::md5::Md5;
 #[cfg(feature = "crammd5-auth")]
 use hex::ToHex;
-use smtp::NUL;
 use smtp::error::Error;
+use smtp::NUL;
 use std::fmt::{self, Display, Formatter};
 
 /// Accepted authentication mecanisms on an encrypted connection
@@ -30,7 +30,6 @@ pub const DEFAULT_UNENCRYPTED_MECHANISMS: &'static [Mechanism] = &[Mechanism::Cr
 /// When CRAMMD5 support is not enabled, no mechanisms are allowed.
 #[cfg(not(feature = "crammd5-auth"))]
 pub const DEFAULT_UNENCRYPTED_MECHANISMS: &'static [Mechanism] = &[];
-
 
 /// Convertable to user credentials
 pub trait IntoCredentials {
@@ -61,10 +60,7 @@ pub struct Credentials {
 impl Credentials {
     /// Create a `Credentials` struct from username and password
     pub fn new(username: String, password: String) -> Credentials {
-        Credentials {
-            username: username,
-            password: password,
-        }
+        Credentials { username, password }
     }
 }
 
@@ -119,18 +115,13 @@ impl Mechanism {
         challenge: Option<&str>,
     ) -> Result<String, Error> {
         match *self {
-            Mechanism::Plain => {
-                match challenge {
-                    Some(_) => Err(Error::Client("This mechanism does not expect a challenge")),
-                    None => Ok(format!(
-                        "{}{}{}{}",
-                        NUL,
-                        credentials.username,
-                        NUL,
-                        credentials.password
-                    )),
-                }
-            }
+            Mechanism::Plain => match challenge {
+                Some(_) => Err(Error::Client("This mechanism does not expect a challenge")),
+                None => Ok(format!(
+                    "{}{}{}{}",
+                    NUL, credentials.username, NUL, credentials.password
+                )),
+            },
             Mechanism::Login => {
                 let decoded_challenge = match challenge {
                     Some(challenge) => challenge,
@@ -146,7 +137,7 @@ impl Mechanism {
                 }
 
                 Err(Error::Client("Unrecognized challenge"))
-            }
+            },
             #[cfg(feature = "crammd5-auth")]
             Mechanism::CramMd5 => {
                 let decoded_challenge = match challenge {
@@ -162,7 +153,7 @@ impl Mechanism {
                     credentials.username,
                     hmac.result().code().to_hex()
                 ))
-            }
+            },
         }
     }
 }
@@ -212,7 +203,7 @@ mod test {
             mechanism
                 .response(
                     &credentials,
-                    Some("PDE3ODkzLjEzMjA2NzkxMjNAdGVzc2VyYWN0LnN1c2FtLmluPg=="),
+                    Some("PDE3ODkzLjEzMjA2NzkxMjNAdGVzc2VyYWN0LnN1c2FtLmluPg==")
                 )
                 .unwrap(),
             "alice a540ebe4ef2304070bbc3c456c1f64c0"
