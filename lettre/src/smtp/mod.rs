@@ -141,19 +141,19 @@ pub const SUBMISSION_PORT: u16 = 587;
 // Useful strings and characters
 
 /// The word separator for SMTP transactions
-pub const SP: &'static str = " ";
+pub const SP: &str = " ";
 
 /// The line ending for SMTP transactions (carriage return + line feed)
-pub const CRLF: &'static str = "\r\n";
+pub const CRLF: &str = "\r\n";
 
 /// Colon
-pub const COLON: &'static str = ":";
+pub const COLON: &str = ":";
 
 /// The ending of message content
-pub const MESSAGE_ENDING: &'static str = "\r\n.\r\n";
+pub const MESSAGE_ENDING: &str = "\r\n.\r\n";
 
 /// NUL unicode character
-pub const NUL: &'static str = "\0";
+pub const NUL: &str = "\0";
 
 /// How to apply TLS to a client connection
 #[derive(Clone)]

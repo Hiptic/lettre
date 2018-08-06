@@ -15,21 +15,21 @@ use std::fmt::{self, Display, Formatter};
 /// Accepted authentication mecanisms on an encrypted connection
 /// Trying LOGIN last as it is deprecated.
 #[cfg(feature = "crammd5-auth")]
-pub const DEFAULT_ENCRYPTED_MECHANISMS: &'static [Mechanism] =
+pub const DEFAULT_ENCRYPTED_MECHANISMS: &[Mechanism] =
     &[Mechanism::Plain, Mechanism::CramMd5, Mechanism::Login];
 /// Accepted authentication mecanisms on an encrypted connection
 /// Trying LOGIN last as it is deprecated.
 #[cfg(not(feature = "crammd5-auth"))]
-pub const DEFAULT_ENCRYPTED_MECHANISMS: &'static [Mechanism] =
+pub const DEFAULT_ENCRYPTED_MECHANISMS: &[Mechanism] =
     &[Mechanism::Plain, Mechanism::Login];
 
 /// Accepted authentication mecanisms on an unencrypted connection
 #[cfg(feature = "crammd5-auth")]
-pub const DEFAULT_UNENCRYPTED_MECHANISMS: &'static [Mechanism] = &[Mechanism::CramMd5];
+pub const DEFAULT_UNENCRYPTED_MECHANISMS: &[Mechanism] = &[Mechanism::CramMd5];
 /// Accepted authentication mecanisms on an unencrypted connection
 /// When CRAMMD5 support is not enabled, no mechanisms are allowed.
 #[cfg(not(feature = "crammd5-auth"))]
-pub const DEFAULT_UNENCRYPTED_MECHANISMS: &'static [Mechanism] = &[];
+pub const DEFAULT_UNENCRYPTED_MECHANISMS: &[Mechanism] = &[];
 
 /// Convertable to user credentials
 pub trait IntoCredentials {
