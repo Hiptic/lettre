@@ -503,7 +503,10 @@ impl<'a> SmtpTransport {
 
 impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
     /// Sends an email
-    #[cfg_attr(feature = "cargo-clippy", allow(match_same_arms, cyclomatic_complexity))]
+    #[cfg_attr(
+        feature = "cargo-clippy",
+        allow(match_same_arms, cyclomatic_complexity)
+    )]
     fn send<U: SendableEmail<'a, T> + 'a>(&mut self, email: &'a U) -> SmtpResult {
         // Extract email information
         let message_id = email.message_id();
@@ -533,7 +536,8 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SmtpResult> for SmtpTransport {
             .server_info
             .as_ref()
             .unwrap()
-            .supports_feature(Extension::SmtpUtfEight) && self.client_info.smtp_utf8
+            .supports_feature(Extension::SmtpUtfEight)
+            && self.client_info.smtp_utf8
         {
             mail_options.push(MailParameter::SmtpUtfEight);
         }

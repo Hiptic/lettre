@@ -52,7 +52,13 @@
 //! See the `EmailBuilder` documentation for a complete list of methods.
 //!
 
-#![deny(missing_docs, unsafe_code, unstable_features, warnings, missing_debug_implementations)]
+#![deny(
+    missing_docs,
+    unsafe_code,
+    unstable_features,
+    warnings,
+    missing_debug_implementations
+)]
 
 extern crate email as email_format;
 extern crate lettre;
@@ -649,8 +655,7 @@ impl EmailBuilder {
             .header((
                 "Content-Disposition",
                 format!("attachment; filename=\"{}\"", actual_filename),
-            ))
-            .header(("Content-Type", content_type.to_string()))
+            )).header(("Content-Type", content_type.to_string()))
             .build();
 
         self.set_message_type(MimeMultipartType::Mixed);
@@ -733,8 +738,7 @@ impl EmailBuilder {
             .header((
                 "Content-Type",
                 format!("{}", mime::TEXT_PLAIN_UTF_8).as_ref(),
-            ))
-            .build();
+            )).build();
 
         let html = PartBuilder::new()
             .body(body_html)

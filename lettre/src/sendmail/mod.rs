@@ -56,8 +56,7 @@ impl<'a, T: Read + 'a> EmailTransport<'a, T, SendmailResult> for SendmailTranspo
                 "-f",
                 &email.from().to_string(),
                 &to_addresses.join(" "),
-            ])
-            .stdin(Stdio::piped())
+            ]).stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()?;
 
