@@ -1,9 +1,11 @@
-//! Lettre is a mailer written in Rust. It provides a simple email builder and several transports.
+//! Lettre is a mailer written in Rust. It provides a simple email builder and
+//! several transports.
 //!
 //! ## Overview
 //!
-//! The `email` part builds email messages. For now, it does not support attachments.
-//! An email is built using an `EmailBuilder`. The simplest email could be:
+//! The `email` part builds email messages. For now, it does not support
+//! attachments. An email is built using an `EmailBuilder`. The simplest email
+//! could be:
 //!
 //! ```rust
 //! use lettre_email::EmailBuilder;
@@ -21,13 +23,13 @@
 //! assert!(email.is_ok());
 //! ```
 //!
-//! When the `build` method is called, the `EmailBuilder` will add the missing headers (like
-//! `Message-ID` or `Date`) and check for missing necessary ones (like `From` or `To`). It will
-//! then generate an `Email` that can be sent.
+//! When the `build` method is called, the `EmailBuilder` will add the missing
+//! headers (like `Message-ID` or `Date`) and check for missing necessary ones
+//! (like `From` or `To`). It will then generate an `Email` that can be sent.
 //!
-//! The `text()` method will create a plain text email, while the `html()` method will create an
-//! HTML email. You can use the `alternative()` method to provide both versions, using plain text
-//! as fallback for the HTML version.
+//! The `text()` method will create a plain text email, while the `html()`
+//! method will create an HTML email. You can use the `alternative()` method to
+//! provide both versions, using plain text as fallback for the HTML version.
 //!
 //! Below is a more complete example, not using method chaining:
 //!
@@ -608,9 +610,9 @@ impl EmailBuilder {
         mut self,
         path: &Path,
         filename: Option<&str>,
-        content_type: Mime,
+        content_type: &Mime,
     ) -> Result<EmailBuilder, Error> {
-        self.set_attachment(path, filename, content_type)?;
+        self.set_attachment(path, filename, &content_type)?;
         Ok(self)
     }
 
@@ -620,7 +622,7 @@ impl EmailBuilder {
         &mut self,
         path: &Path,
         filename: Option<&str>,
-        content_type: Mime,
+        content_type: &Mime,
     ) -> Result<(), Error> {
         let file = File::open(path);
         let body = match file {
