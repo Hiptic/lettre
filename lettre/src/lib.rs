@@ -5,6 +5,7 @@
 //!
 
 #![deny(missing_docs, unsafe_code, unstable_features, warnings)]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy))]
 
 #[macro_use]
 extern crate log;

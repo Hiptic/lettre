@@ -61,6 +61,7 @@
     warnings,
     missing_debug_implementations
 )]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy))]
 
 extern crate email as email_format;
 extern crate lettre;
