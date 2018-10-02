@@ -24,7 +24,7 @@ impl ClientTlsParameters {
 
 /// Accepted protocols by default.
 /// This removes TLS 1.0 compared to tls-native defaults.
-pub const DEFAULT_TLS_PROTOCOLS: &[Protocol] = &[Protocol::Tlsv11, Protocol::Tlsv12];
+pub const MIN_TLS_PROTOCOL: Protocol = Protocol::Tlsv11;
 
 #[derive(Debug)]
 /// Represents the different types of underlying network streams
