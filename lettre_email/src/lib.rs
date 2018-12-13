@@ -714,7 +714,7 @@ impl EmailBuilder {
     pub fn set_html<S: Into<String>>(&mut self, body: S) {
         self.message.set_body(body);
         self.message
-            .add_header(("Content-Type", format!("{}", mime::TEXT_HTML).as_ref()));
+            .add_header(("Content-Type", format!("{}", mime::TEXT_HTML_UTF_8).as_ref()));
     }
 
     /// Sets the email content
@@ -745,7 +745,7 @@ impl EmailBuilder {
 
         let html = PartBuilder::new()
             .body(body_html)
-            .header(("Content-Type", format!("{}", mime::TEXT_HTML).as_ref()))
+            .header(("Content-Type", format!("{}", mime::TEXT_HTML_UTF_8).as_ref()))
             .build();
 
         alternate.add_child(text);
