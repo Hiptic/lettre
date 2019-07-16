@@ -1,7 +1,7 @@
 [package]
 
 name = "lettre_email"
-version = "0.7.0"
+version = "0.7.1"
 description = "Email builder"
 readme = "README.md"
 documentation = "https://docs.rs/lettre_email/"
@@ -22,5 +22,5 @@ lettre = { path = "../lettre", features = ["smtp-transport"] }
 email = "^0.0"
 mime = "^0.3"
 time = "^0.1"
-uuid = { version = ">=0.4, <0.6", features = ["v4"] }
 lettre = { path = "../lettre", default-features = false }
+uuid = { version = ">=0.4, <0.8", features = ["v4"] }
